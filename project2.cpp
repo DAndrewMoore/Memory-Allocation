@@ -18,7 +18,7 @@ int* memoryScope(){
     return space;
 }
 
-int checkMemory(int& space, int memorySize){
+int checkMemory(int *space, int memorySize){
     int openSize = 0;
     int i=1;
     
@@ -34,8 +34,8 @@ int checkMemory(int& space, int memorySize){
         return 0;
 }
 
-int my_malloc(int& space, int memoryReq){
-    int holeStart = checkMemory(memoryReq);
+int my_malloc(int *space, int memoryReq){
+    int holeStart = checkMemory(space, memoryReq);
     
     if(holeStart){
         for(int i=0; i<memoryReq; i++)
@@ -45,12 +45,12 @@ int my_malloc(int& space, int memoryReq){
     return holeStart;
 }
 
-void my_malloc(int& space, int memoryReq, int holeStart){
+void my_malloc(int *space, int memoryReq, int holeStart){
     for(int i=0; i<memoryReq; i++)
         space[holeStart+i] = 1;
 }
 
-void my_free(int& space, int memorySize, int memoryLocale){
+void my_free(int *space, int memorySize, int memoryLocale){
     for(int i=0; i<memorySize; i++)
         space[memoryLocale + i] = 0;
 }
@@ -120,7 +120,7 @@ void FIFO(vector<processStruct> pVec, int processors = 4){
         for(int i=0; i<executing.size(); i++)
             if(executing[i].cycleCount <= 0){
                 processStruct pS = executing[i]; //get the process info
-                my_free(pS.memoryOffset, pS.memoryPrint, space); //free the space
+                my_free(space, pS.memoryPrint, pS.memoryOffset); //free the space
                 executing.erase(executing.begin()); //erase the process
                 checkMem = 1; //initiate a check if waitQueue processes are waiting for memory
             }
