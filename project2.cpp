@@ -5,63 +5,16 @@
  * Created on May 1, 2016, 8:59 PM
  */
 
-#include <cstdlib>
 #include <ctime>
 #include <vector>
 #include <string>
 #include "processes.h"
+#include "manager.h"
 
 using namespace std;
 
-int* memoryScope(int maxMem){
-    //printf("Memory scoped\n");
-    int* space = (int *) malloc(sizeof(int) * maxMem);
-    return space;
-}
-
-int checkMemory(int *space, int memorySize, int maxMem){
-    //printf("Memory check\n");
-    int openSize = 0;
-    int i=1;
-    
-    for(; i<20000001 && openSize != memorySize; i++)
-        if(space[i] == 0)
-            openSize++;
-        else
-            openSize = 0;
-    
-    if(openSize == memorySize)
-        return i-memorySize+1;
-    else
-        return 0;
-}
-
-int my_malloc(int *space, int memoryReq, int maxMem){
-    //printf("Malloc started");
-    int holeStart = checkMemory(space, memoryReq, maxMem);
-    
-    if(holeStart){
-        for(int i=0; i<memoryReq; i++)
-            space[holeStart+i] = 1;
-    }
-    
-    return holeStart;
-}
-
-void my_malloc(int *space, int memoryReq, int holeStart, int maxMem){
-    //printf("Other malloc started\n");
-    for(int i=0; i<memoryReq; i++)
-        space[holeStart+i] = 1;
-}
-
-void my_free(int *space, int memorySize, int memoryLocale){
-    //printf("Free memory\n");
-    for(int i=0; i<memorySize; i++)
-        space[memoryLocale + i] = 0;
-}
-
 void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int processors = 4){
-    //printf("Variable creation\n");
+    printf("Maximum Memory Available: %d\n", maxMem);
     vector<processStruct> waitQueue;
     vector<processStruct> executing;
     int waitTime = 0;
@@ -145,7 +98,7 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
     }
     
     printf("Total wait time: %d\n", waitTime);
-    waitTime = waitTime / 50.0;
+    waitTime = waitTime / 64.0;
     printf("Average wait time: %d\n", waitTime);
 }
 
@@ -159,7 +112,7 @@ int main(int argc, char** argv) {
     printf("4 cores, 20MB memory\n");
     t = clock();
     int* space = memoryScope(20000001);
-    FIFO(space, pVec);
+    FIFO(space, pVec, 20000001, 8);
     t = clock() - t;
     printf("It took %d clicks.\n", t);
     
@@ -174,7 +127,7 @@ int main(int argc, char** argv) {
     printf("\n4 cores, %d bytes of memory\n", (int)(totalMem * 0.5));
     t = clock();
     space = memoryScope((int)(totalMem * 0.5));
-    FIFO(space, pVec, totalMem * 0.5);
+    FIFO(space, pVec, totalMem * 0.5, 8);
     t = clock() - t;
     printf("It took %d clicks.\n", t);
     
@@ -184,7 +137,7 @@ int main(int argc, char** argv) {
     printf("\n4 cores, %d bytes of memory\n", (int)(totalMem * 0.1));
     t = clock();
     space = memoryScope((int)(totalMem * 0.1));
-    FIFO(space, pVec, totalMem * 0.1);
+    FIFO(space, pVec, totalMem * 0.1, 8);
     t = clock() - t;
     printf("It took %d clicks.\n", t);
     
