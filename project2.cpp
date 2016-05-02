@@ -14,15 +14,17 @@
 using namespace std;
 
 int* memoryScope(){
-    int* space = (int *) malloc(sizeof(int) * 2000001);
+    printf("Memory scoped\n");
+    int* space = (int *) malloc(sizeof(int) * 20000001);
     return space;
 }
 
 int checkMemory(int *space, int memorySize){
+    printf("Memory check\n");
     int openSize = 0;
     int i=1;
     
-    for(; i<20000001 && openSize == memorySize; i++)
+    for(; i<20000001 && openSize != memorySize; i++)
         if(space[i] == 0)
             openSize++;
         else
@@ -35,6 +37,7 @@ int checkMemory(int *space, int memorySize){
 }
 
 int my_malloc(int *space, int memoryReq){
+    printf("Malloc started");
     int holeStart = checkMemory(space, memoryReq);
     
     if(holeStart){
@@ -46,25 +49,30 @@ int my_malloc(int *space, int memoryReq){
 }
 
 void my_malloc(int *space, int memoryReq, int holeStart){
+    printf("Other malloc started\n");
     for(int i=0; i<memoryReq; i++)
         space[holeStart+i] = 1;
 }
 
 void my_free(int *space, int memorySize, int memoryLocale){
+    printf("Free memory\n");
     for(int i=0; i<memorySize; i++)
         space[memoryLocale + i] = 0;
 }
 
 void FIFO(vector<processStruct> pVec, int processors = 4){
+    printf("Variable creation\n");
     vector<processStruct> waitQueue;
     vector<processStruct> executing;
     int waitTime = 0;
+    int counter = 0;
     int checkMem = 1;
     int* space = memoryScope();
-     
+    
+    printf("Enter the while(d)\n");
     while(1){
         //If we need to enqueue a new process
-        if(waitTime % 50 == 0 && pVec.size() != 0){
+        if(counter % 50 == 0 && pVec.size() != 0){
             //If we should put it straight on the processor
             if(executing.size() < processors){
                 //If we have more than one processor in execution
@@ -96,11 +104,13 @@ void FIFO(vector<processStruct> pVec, int processors = 4){
         
         //If we're not at process income point, but we need something to process
         if(checkMem && executing.size() < processors && waitQueue.size() > 0){
+            printf("Checking if we can add a process\n");
             processStruct pS = waitQueue.front(); //Get the process at front of waiting queue
             int holeStart = checkMemory(space, pS.memoryPrint); //Check if we have enough memory available
             
             //If we have enough memory
             if(holeStart > 0){
+                printf("We can add a process to the executioner\n");
                 pS.memoryOffset = holeStart; //Set the memory start position
                 my_malloc(space, pS.memoryPrint, holeStart); //Assign the space
                 executing.push_back(pS); //push on to executing block
@@ -123,6 +133,7 @@ void FIFO(vector<processStruct> pVec, int processors = 4){
                 my_free(space, pS.memoryPrint, pS.memoryOffset); //free the space
                 executing.erase(executing.begin()); //erase the process
                 checkMem = 1; //initiate a check if waitQueue processes are waiting for memory
+                printf("Process unloaded\n");
             }
         
         //Increase waitTime by amount of processes waiting
@@ -130,6 +141,8 @@ void FIFO(vector<processStruct> pVec, int processors = 4){
         
         if(pVec.size() == 0 && executing.size() == 0 && waitQueue.size() == 0)
             break;
+        
+        counter++;
     }
     
     printf("Total wait time: %d\n", waitTime);
@@ -139,9 +152,9 @@ void FIFO(vector<processStruct> pVec, int processors = 4){
 
 int main(int argc, char** argv) {
     clock_t t;
-    
+    printf("Creating processes\n");
     vector<processStruct> pVec = genProcs(50, "Test");
-    
+    printf("Initiating scheduler\n");
     t = clock();
     FIFO(pVec);
     t = clock() - t;
