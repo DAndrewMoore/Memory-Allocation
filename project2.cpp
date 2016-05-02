@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
     printf("4 cores, 20MB memory\n");
     t = clock();
     int* space = memoryScope(20000001);
-    FIFO(space, pVec, 20000001, 8);
+    FIFO(space, pVec, 20000001);
     t = clock() - t;
     printf("It took %d clicks.\n", t);
     
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
     printf("\n4 cores, %d bytes of memory\n", (int)(totalMem * 0.5));
     t = clock();
     space = memoryScope((int)(totalMem * 0.5));
-    FIFO(space, pVec, totalMem * 0.5, 8);
+    FIFO(space, pVec, totalMem * 0.5);
     t = clock() - t;
     printf("It took %d clicks.\n", t);
     
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
     printf("\n4 cores, %d bytes of memory\n", (int)(totalMem * 0.1));
     t = clock();
     space = memoryScope((int)(totalMem * 0.1));
-    FIFO(space, pVec, totalMem * 0.1, 8);
+    FIFO(space, pVec, totalMem * 0.1);
     t = clock() - t;
     printf("It took %d clicks.\n", t);
     

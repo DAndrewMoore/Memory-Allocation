@@ -14,6 +14,7 @@ int pid;
 int cycleCount;
 int memoryPrint;
 int entranceTime;
+int memoryOffset;
 } processStruct;
 
 std::vector<processStruct> genProcs(int, std::string);
