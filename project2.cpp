@@ -61,12 +61,12 @@ void FIFO(vector<processStruct> pVec, int processors = 1){
         if(waitTime % 50 == 0 && pVec.size() != 0){
             //If we should put it straight on the processor
             if(executing.size() == 0 && executing.size() < processors){
-                processStruct pS = pVec.front();
-                int holeStart = my_malloc(space, pS.memoryPrint);
-                pS.memoryOffset(holeStart);
-                executing.push_back(pS);
+                processStruct pS = pVec.front(); //get the process
+                int holeStart = my_malloc(space, pS.memoryPrint); //unconditional malloc since 0 processes executing
+                pS.memoryOffset = holeStart; //assign the holeStart position for faster deletion
+                executing.push_back(pS); //push on to executing block
             }
-            else
+            else //otherwise push on to waitqueue
                 waitQueue.push_back(pVec.front());
            
             //Either way we'll delete the processes from pseudo-processes
@@ -74,9 +74,11 @@ void FIFO(vector<processStruct> pVec, int processors = 1){
         }
         
         //If we're not at process income point, but we need something to process
-        if(executing.size() == 0 && checkMemory(pVec.front().memoryPrint)){
-            executing.push_back(pVec.front());
-            pVec.erase(pVec.begin());
+        if(executing.size() == 0 && waitQueue.size() > 0){
+            processStruct pS = waitQueue.front(); //Get the process at front of waiting queue
+            pS.memoryOffset = my_malloc(space, pS.memoryPrint); //get the memory start position
+            executing.push_back(pS); //push on to executing block
+            waitQueue.erase(waitQueue.begin()); //delete from waiting queue
         }
         
         //If we have processes in execution
@@ -87,12 +89,15 @@ void FIFO(vector<processStruct> pVec, int processors = 1){
         
         //Check if any process is done
         for(int i=0; i<executing.size(); i++)
-            if(executing[i].cycleCount <= 0)
+            if(executing[i].cycleCount <= 0){
+                processStruct pS = executing[i];
+                my_free(pS.memoryOffset, pS.memoryPrint, space);
                 executing.erase(executing.begin());
+            }
         
         waitTime += waitQueue.size();
         
-        if(pVec.size() == 0 && executing.size() == 0)
+        if(pVec.size() == 0 && executing.size() == 0 && waitQueue.size() == 0)
             break;
     }
     
