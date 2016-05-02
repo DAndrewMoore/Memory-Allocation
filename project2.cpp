@@ -14,36 +14,58 @@
 using namespace std;
 
 int* memoryScope(){
-    int* space = (int *) malloc(sizeof(int) * (20) *1000000);
+    int* space = (int *) malloc(sizeof(int) * 2000001);
     return space;
 }
 
-int checkMemory(int memory){
+int checkMemory(int* space, int memorySize){
+    int openSize = 0;
+    int i=1;
     
+    for(; i<20000001 && openSize == memorySize; i++)
+        if(space[i] == 0)
+            openSize++;
+        else
+            openSize = 0;
+    
+    if(openSize == memorySize)
+        return i-memorySize+1;
+    else
+        return 0;
 }
 
-int my_malloc(int memoryReq){
-    if(checkMemory(memoryReq)){
-        
+int my_malloc(int* space, int memoryReq){
+    int holeStart = checkMemory(memoryReq);
+    
+    if(holeStart){
+        for(int i=0; i<memoryReq; i++)
+            space[holeStart+i] = 1;
     }
+    
+    return holeStart;
 }
 
-void my_free(int* memoryLocale, int memorySize){
+void my_free(int memoryLocale, int memorySize, int* space){
     for(int i=0; i<memorySize; i++)
-        memoryLocale[i] = 0;
+        space[memoryLocale + i] = 0;
 }
 
 void FIFO(vector<processStruct> pVec, int processors = 1){
     vector<processStruct> waitQueue;
     vector<processStruct> executing;
     int waitTime = 0;
+    int* space = memoryScope();
      
     while(1){
         //If we need to enqueue a new process
         if(waitTime % 50 == 0 && pVec.size() != 0){
             //If we should put it straight on the processor
-            if(executing.size() == 0 && executing.size() < processors)
-                executing.push_back(pVec.front());
+            if(executing.size() == 0 && executing.size() < processors){
+                processStruct pS = pVec.front();
+                int holeStart = my_malloc(space, pS.memoryPrint);
+                pS.memoryOffset(holeStart);
+                executing.push_back(pS);
+            }
             else
                 waitQueue.push_back(pVec.front());
            

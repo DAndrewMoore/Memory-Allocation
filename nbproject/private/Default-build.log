@@ -1,0 +1,3 @@
+g++ -std=c++0x   -c -o project2.o project2.cpp
+g++ -std=c++0x   -c -o processes.o processes.cpp
+g++ -std=c++0x -o main project2.o processes.o
