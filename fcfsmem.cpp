@@ -27,18 +27,18 @@ public:
 tuple::tuple (int count, int at, int cyc, int mem) {
     pid = count;
     arrival_t = at;
-	cycles = cyc; //cycles remaining
+    cycles = cyc; //cycles remaining
     memory = mem;
-	waited = 0;	
-	stalled = 0;
-	start_flag = 0;
-	fin = 0;
-	tlip = cyc;
-	switching = 0;
+    waited = 0;	
+    stalled = 0;
+    start_flag = 0;
+    fin = 0;
+    tlip = cyc;
+    switching = 0;
 }
 
 
-int processProcs (double mem_change){
+void processProcs (double mem_change){
 
 int k = 64; 		//number of processes
 int q = 50; 		//RoundRobin quantum
@@ -63,10 +63,11 @@ clock_t regTotalFreeTime = 0;
 int rem_mem, max_mem, tot_mem, total_processes_mem;
 max_mem = 20;
 tot_mem = 0;
+total_processes_mem = 0;
 
 tuple *tuples[k];	//initial processes
 tuple *completed[k];//completed processed
-tuple *proc[4];		//4 cores
+tuple *proc[64];		//4 cores
 std::queue<tuple*> fifo;	//FIFO queue
 
 int total_free_time = 0;
@@ -87,8 +88,10 @@ srand(time(NULL));
 std::cout << "spawning " << k << " processes" << std::endl;
 //create processes with arrival timess at intervals of 50
 for (j=0; j<3200; j+=50){
-	tuples[i] = new tuple(i, j, cycles(generator), memory(generator));	// j = arrival t
-	total_processes_mem += tuples[i]->memory;
+    int cycleCount = cycles(generator);
+    int mem = memory(generator);
+	tuples[i] = new tuple(i, j, cycleCount, mem);	// j = arrival t
+	total_processes_mem += mem;
 	i++;
 }
 std::cout << "total_processes_mem: " << total_processes_mem << std::endl; 
@@ -106,17 +109,17 @@ for (i=0; i<k; i++){
 	proc[i] = NULL;
 }
 
+//change according to total need
+if(mem_change != 1.0)
+	max_mem = (int) (total_processes_mem * mem_change);
+else
+	max_mem = 20000001; //default memory size
+
 //initialize custom manager space
 cusTime = clock();
 int* space = memoryScope(max_mem);
 cusTime = clock() - cusTime;
 cusTotalMalTime += cusTime; //since it is a malloc we add it to total malloc time
-
-if(mem_change != 1.0)
-	max_mem = (int) (total_processes_mem * mem_change); //change according to total need
-else
-	max_mem = 20000001; //default memory size
-
 
 //until not finished
 for (current_time=0; finished<64; current_time+=lowest){ // process in lowest current_time increments
@@ -124,7 +127,7 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 	rem_mem = max_mem - tot_mem;
 	////////////////////////// FILL //////////////////////////////
 	// add waiting (fifo) to running if memory is available
-	std::cout << std::endl << "---------------------------------------curent time:  " << current_time << std::endl;
+	//std::cout << std::endl << "---------------------------------------curent time:  " << current_time << std::endl;
 	for (i=0; i<k; i++){
 		if (fifo.empty() != 1 && (fifo.front()->memory <= rem_mem) && proc[i] == 0){
 				proc[i] = fifo.front();
@@ -140,7 +143,10 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 				//total_malloc_time += ?;
 				regTotalMalTime += regTime;
 				///////////////////////////////////////////
-
+                                
+                                for(int m=0; m<proc[i]->memory; m++)
+                                    proc[i]->memSpot[m] = rand() % 1000 + 1;
+                                
 				///////////////////////////////////////////
 				// CUSTOM my_malloc() TIMING
 				//start custom time
@@ -253,27 +259,25 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 
 /////////////////////////////////////////////////////
 //   			DISPLAY DATA
-int total_trivial = total_free_time + total_malloc_time;
-int total_custom = total_my_malloc_time + total_my_free_time; 
+clock_t total_trivial = regTotalMalTime + regTotalFreeTime;
+clock_t total_custom = cusTotalMalTime + cusTotalFreeTime; 
 
 std::cout << "-----------------------------------------------------------" << std::endl;
 std::cout << "Processes Finished." << std::endl;
 
 std::cout  << std::endl<<std::endl<< "Total time for trivial management system" << std::endl << "--------------------------------------" << std::endl;
-std::cout << "free(): "<< total_free_time << "     malloc(): "<< total_malloc_time << "     total trivial: "<< total_trivial  << std::endl;
+std::cout << "free(): "<< total_free_time << "     malloc(): "<< regTotalMalTime << "     total trivial: "<< total_trivial  << std::endl;
 
 std::cout << std::endl << std::endl << "Total time for custom management system" << std::endl << "--------------------------------------" << std::endl;
-std::cout << "my_malloc(): "<< total_my_malloc_time << "     my_free(): "<< total_my_free_time << "     total custom: "<< total_custom <<  std::endl;
-
-exit(0);
+std::cout << "my_malloc(): "<< cusTotalFreeTime << "     my_free(): "<< cusTotalMalTime << "     total custom: "<< total_custom <<  std::endl;
 //
 /////////////////////////////////////////////////////
-
-return 0;
 }
 
 int main (){
 	double mem_sizes [3] = {1.0, 0.5, 0.1};
 	for(double mem_size: mem_sizes)
 		processProcs(mem_size);
+        
+        return 0;
 }
