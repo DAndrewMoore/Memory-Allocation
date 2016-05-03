@@ -130,7 +130,7 @@ void trivialFIFO(vector<processStruct> pVec, string seed, int maxMem = 20000001,
         }
     }
     ofstream f;
-    f.open(seed+".csv");
+    f.open(".\\seeds\\"+seed+".csv");
     printf("\n============== Trivial Manager ==============\n");
     printf("Total count was: %d\n", counter);
     printf("Average count per process: %f\n", (counter / 64.0));
@@ -249,7 +249,7 @@ void FIFO(int* space, vector<processStruct> pVec, string seed, int maxMem = 2000
             break;
     }
     ofstream f;
-    f.open(seed+".csv");
+    f.open(".\\seeds\\"+seed+".csv");
     printf("\n============== Custom Manager ==============\n");
     printf("Total count was: %d\n", counter);
     printf("Average count per process: %f\n", (counter / 64.0));
@@ -277,7 +277,7 @@ int main(int argc, char** argv) {
     printf("Total_Time, Total_malloc_time, Total_free_time\n");
     for(string seed: seeds){
         ofstream f;
-        f.open(seed+".csv");
+        f.open(".\\seeds\\"+seed+".csv");
         f << "Total_Time,Total_malloc_time,Total_free_time\n";
         f.close();
         //Initiate process vector
