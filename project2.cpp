@@ -17,6 +17,9 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
     printf("Maximum Memory Available: %d\n", maxMem);
     vector<processStruct> waitQueue;
     vector<processStruct> executing;
+    clock_t t;
+    clock_t total_malloc_time = 0;
+    clock_t total_free_time = 0;
     int waitTime = 0;
     int counter = 0;
     int checkMem = 1;
@@ -30,19 +33,27 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
                 //If we have more than one processor in execution
                 if(executing.size() != 0){
                     processStruct pS = pVec.front(); //Get the process
+                    t = clock();
                     int holeStart = checkMemory(space, pS.memoryPrint, maxMem); //Check if we can add it to the execution list
-                    
+                    t = clock() - t;
+                    total_malloc_time += t;
                     //If we can add it to the execution list
                     if(holeStart > 0){
                         pS.memoryOffset = holeStart; //set the offset
+                        t = clock();
                         my_malloc(space, pS.memoryPrint, holeStart, maxMem); //assign the space
+                        t = clock() - t;
+                        total_malloc_time += t;
                         executing.push_back(pS); //add it to execution list
                     } else {
                         waitQueue.push_back(pS); //If we can't, then put it on the waitQueue
                     }
                 } else { //If we have no processors in use
                     processStruct pS = pVec.front(); //get the process
+                    t = clock();
                     int holeStart = my_malloc(space, pS.memoryPrint, maxMem); //unconditional malloc since 0 processes executing
+                    t = clock() - t;
+                    total_malloc_time += t;
                     pS.memoryOffset = holeStart; //assign the holeStart position for faster deletion
                     executing.push_back(pS); //push on to executing block
                 }
@@ -58,13 +69,19 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
         if(checkMem && executing.size() < processors && waitQueue.size() > 0){
             //printf("Checking if we can add a process\n");
             processStruct pS = waitQueue.front(); //Get the process at front of waiting queue
+            t = clock();
             int holeStart = checkMemory(space, pS.memoryPrint, maxMem); //Check if we have enough memory available
+            t = clock() - t;
+            total_malloc_time += t;
             
             //If we have enough memory
             if(holeStart > 0){
                 //printf("We can add a process to the executioner\n");
                 pS.memoryOffset = holeStart; //Set the memory start position
+                t = clock();
                 my_malloc(space, pS.memoryPrint, holeStart, maxMem); //Assign the space
+                t = clock() - t;
+                total_malloc_time += t;
                 executing.push_back(pS); //push on to executing block
                 waitQueue.erase(waitQueue.begin()); //delete from waiting queue
             } else { //If we don't have enough memory
@@ -82,8 +99,12 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
         for(int i=0; i<executing.size(); i++)
             if(executing[i].cycleCount <= 0){
                 processStruct pS = executing[i]; //get the process info
+                t = clock();
                 my_free(space, pS.memoryPrint, pS.memoryOffset); //free the space
-                executing.erase(executing.begin()); //erase the process
+                t = clock() - t;
+                total_free_time += t;
+                executing.erase(executing.begin()+i); //erase the process
+                i = i-1;
                 checkMem = 1; //initiate a check if waitQueue processes are waiting for memory
                 //printf("Process unloaded\n");
             }
@@ -96,10 +117,11 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
         
         counter++;
     }
-    
-    printf("Total wait time: %d\n", waitTime);
-    waitTime = waitTime / 64.0;
-    printf("Average wait time: %d\n", waitTime);
+    printf("Total count was: %d\n", counter);
+    printf("Average count per process: %f\n", (counter / 64.0));
+    printf("Total time taken: %f\n", ((float)total_malloc_time + total_free_time)/CLOCKS_PER_SEC);
+    printf("Total malloc time: %f\n", ((float)total_malloc_time)/CLOCKS_PER_SEC);
+    printf("Total freeing time: %f\n", ((float)total_free_time)/CLOCKS_PER_SEC);
 }
 
 int main(int argc, char** argv) {
@@ -123,23 +145,37 @@ int main(int argc, char** argv) {
     for(int i=0; i<pVec.size(); i++)
         totalMem += pVec[i].memoryPrint;
     
-    //Test with 4 cores and 50% of total memory requirement
-    printf("\n4 cores, %d bytes of memory\n", (int)(totalMem * 0.5));
-    t = clock();
-    space = memoryScope((int)(totalMem * 0.5));
-    FIFO(space, pVec, totalMem * 0.5);
-    t = clock() - t;
-    printf("It took %d clicks.\n", t);
     
-    pVec = genProcs(64, "Test");
+    for(double memory: memories){
+        if(memory == 1.0){
+            t = clock();
+            int* space = memoryScope(maxMem);
+            FIFO(space, pVec, maxMem);
+            t = clock() - t;
+            printf("It took %d clicks.\n\n", t);
+        } else {
+            t = clock();
+            int* space = memoryScope((int) (totalMem * memory) +1);
+            FIFO(space, pVec, (int) (totalMem * memory) +1);
+            t = clock() - t;
+            printf("It took %d clicks.\n\n", t);
+        }
+        pVec = genProcs(64, "Test");
+    }
     
-    //Test with 4 cores and 10% of total memory requirement
-    printf("\n4 cores, %d bytes of memory\n", (int)(totalMem * 0.1));
-    t = clock();
-    space = memoryScope((int)(totalMem * 0.1));
-    FIFO(space, pVec, totalMem * 0.1);
-    t = clock() - t;
-    printf("It took %d clicks.\n", t);
+//    int maxNeeded = 0;
+//    int maxPos = 0;
+//    for(int i=0; i<pVec.size(); i++)
+//        if(pVec[i].memoryPrint > maxNeeded){
+//            maxNeeded = pVec[i].memoryPrint;
+//            maxPos = i;
+//        }
+//    
+//    t = clock();
+//    int* space = memoryScope(maxNeeded);
+//    FIFO(space, pVec, maxNeeded);
+//    t = clock() - t;
+//    printf("It took %d clicks.\n", t);
     
     return 0;
 }
