@@ -9,10 +9,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <queue>
-#include <vector>
 #include <time.h>
 #include <random>
-#include <thread>
 #include "manager.h"
 
 //using namespace std;
@@ -63,7 +61,7 @@ clock_t regTotalMalTime = 0;
 clock_t regTotalFreeTime = 0;
 
 int rem_mem, max_mem, tot_mem, total_processes_mem;
-max_mem = 0;
+max_mem = 20;
 tot_mem = 0;
 total_processes_mem = 0;
 
@@ -92,9 +90,9 @@ std::cout << "spawning " << k << " processes" << std::endl;
 for (j=0; j<3200; j+=50){
     int cycleCount = cycles(generator);
     int mem = memory(generator);
-    tuples[i] = new tuple(i, j, cycleCount, mem);	// j = arrival t
-    total_processes_mem += mem;
-    i++;
+	tuples[i] = new tuple(i, j, cycleCount, mem);	// j = arrival t
+	total_processes_mem += mem;
+	i++;
 }
 std::cout << "total_processes_mem: " << total_processes_mem << std::endl; 
 
@@ -113,7 +111,7 @@ for (i=0; i<k; i++){
 
 //change according to total need
 if(mem_change != 1.0)
-	max_mem = (int) (total_processes_mem * mem_change) + 1;
+	max_mem = (int) (total_processes_mem * mem_change);
 else
 	max_mem = 20000001; //default memory size
 
@@ -222,6 +220,7 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 		if (proc[i]!=NULL && proc[i]->tlip == lowest){//time to free this procs memory 
 			
 			proc[i]->tlip = 0;
+                        std::cout << finished << std::endl;
 			finished++;
 			tot_mem -= proc[i]->memory;
 			std::cout << "Process " << proc[i]->pid << " released " <<  proc[i]->memory << " memory at time " << current_time << std::endl;
@@ -254,7 +253,7 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 		else if (proc[i]!=NULL && proc[i]->tlip != lowest){//memory still in use. continue...
 			proc[i]->tlip -= lowest;
 		}
-		else ;//cout << i << " proc[i] empty" << endl;
+		else {}//cout << i << " proc[i] empty" << endl;
 	}
 	////////////////////////////////////////////////////////////////////////////////////
 }//finished 64 processes
@@ -274,13 +273,6 @@ std::cout << std::endl << std::endl << "Total time for custom management system"
 std::cout << "my_malloc(): "<< cusTotalFreeTime << "     my_free(): "<< cusTotalMalTime << "     total custom: "<< total_custom <<  std::endl;
 //
 /////////////////////////////////////////////////////
-delete space;
-delete tuples;
-delete completed;
-delete proc;
-
-exit(0);
-
 }
 
 int main (){

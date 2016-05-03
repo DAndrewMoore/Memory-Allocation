@@ -1,4 +1,9 @@
 #include <cstdlib>
+
+#ifndef TIME_H
+#include <time.h>
+#endif
+
 #include "manager.h"
 
 using namespace std;
@@ -18,14 +23,14 @@ int checkMemory(int *space, int memorySize, int maxMem){
     int openSize = 0;
     int i=1;
     
-    for(; i<20000001 && openSize != memorySize; i++)
+    for(; i<maxMem && openSize != memorySize; i++)
         if(space[i] == 0)
             openSize++;
         else
             openSize = 0;
     
     if(openSize == memorySize)
-        return i-memorySize+1;
+        return i-memorySize;
     else
         return 0;
 }
@@ -34,10 +39,7 @@ int my_malloc(int *space, int memoryReq, int maxMem){
     //printf("Malloc started");
     int holeStart = checkMemory(space, memoryReq, maxMem);
     
-    if(holeStart){
-        for(int i=0; i<memoryReq; i++)
-            space[holeStart+i] = 1;
-    }
+    my_malloc(space, memoryReq, holeStart, maxMem);
     
     return holeStart;
 }
@@ -45,7 +47,7 @@ int my_malloc(int *space, int memoryReq, int maxMem){
 void my_malloc(int *space, int memoryReq, int holeStart, int maxMem){
     //printf("Other malloc started\n");
     for(int i=0; i<memoryReq; i++)
-        space[holeStart+i] = 1;
+        space[holeStart+i] = rand() % 1000 + 1;
 }
 
 void my_free(int *space, int memorySize, int memoryLocale){

@@ -13,8 +13,9 @@
 
 using namespace std;
 
-void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int processors = 4){
+void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int processors = 64){
     printf("Maximum Memory Available: %d\n", maxMem);
+    printf("Maximum Processors Available: %d\n", processors);
     vector<processStruct> waitQueue;
     vector<processStruct> executing;
     clock_t t;
@@ -112,10 +113,10 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
         //Increase waitTime by amount of processes waiting
         waitTime += waitQueue.size();
         
+        counter++;
+        
         if(pVec.size() == 0 && executing.size() == 0 && waitQueue.size() == 0)
             break;
-        
-        counter++;
     }
     printf("Total count was: %d\n", counter);
     printf("Average count per process: %f\n", (counter / 64.0));
@@ -130,15 +131,9 @@ int main(int argc, char** argv) {
     //Initiate process vector
     vector<processStruct> pVec = genProcs(64, "Test");
     
-    //Test with 4 cores and 20MB of memory
-    printf("4 cores, 20MB memory\n");
-    t = clock();
-    int* space = memoryScope(20000001);
-    FIFO(space, pVec, 20000001);
-    t = clock() - t;
-    printf("It took %d clicks.\n", t);
+    double memories [3] = {1.0, 0.5, 0.1};
     
-    pVec = genProcs(64, "Test");
+    int maxMem = 20000001;
     
     //Get the total Mem requirement
     double totalMem = 0;
