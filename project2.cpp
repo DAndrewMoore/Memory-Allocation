@@ -19,8 +19,8 @@ void trivialFIFO(vector<processStruct> pVec, int maxMem = 20000001, int processo
     vector<processStruct> waitQueue;
     vector<processStruct> executing;
     clock_t t;
-    clock_t total_malloc_time = 0;
-    clock_t total_free_time = 0;
+    clock_t total_malloc_time;
+    clock_t total_free_time;
     int waitTime = 0;
     int counter = 0;
     int rem_mem = maxMem;
@@ -142,8 +142,8 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
     vector<processStruct> waitQueue;
     vector<processStruct> executing;
     clock_t t;
-    clock_t total_malloc_time = 0;
-    clock_t total_free_time = 0;
+    clock_t total_malloc_time;
+    clock_t total_free_time;
     int waitTime = 0;
     int counter = 0;
     int checkMem = 1;
@@ -165,7 +165,7 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
                     if(holeStart > 0){
                         pS.memoryOffset = holeStart; //set the offset
                         t = clock();
-                        my_malloc(space, pS.memoryPrint, holeStart, maxMem); //assign the space
+                        my_malloc(space, pS.memoryPrint, holeStart, maxMem, pS.pid); //assign the space
                         t = clock() - t;
                         total_malloc_time += t;
                         executing.push_back(pS); //add it to execution list
@@ -175,7 +175,7 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
                 } else { //If we have no processors in use
                     processStruct pS = pVec.front(); //get the process
                     t = clock();
-                    int holeStart = my_malloc(space, pS.memoryPrint, maxMem); //unconditional malloc since 0 processes executing
+                    int holeStart = my_malloc(space, pS.memoryPrint, maxMem, pS.pid); //unconditional malloc since 0 processes executing
                     t = clock() - t;
                     total_malloc_time += t;
                     pS.memoryOffset = holeStart; //assign the holeStart position for faster deletion
@@ -203,7 +203,7 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
                 //printf("We can add a process to the executioner\n");
                 pS.memoryOffset = holeStart; //Set the memory start position
                 t = clock();
-                my_malloc(space, pS.memoryPrint, holeStart, maxMem); //Assign the space
+                my_malloc(space, pS.memoryPrint, holeStart, maxMem, pS.pid); //Assign the space
                 t = clock() - t;
                 total_malloc_time += t;
                 executing.push_back(pS); //push on to executing block
@@ -268,26 +268,26 @@ int main(int argc, char** argv) {
         for(double memory: memories){
             if(memory == 1.0){
                 t = clock();
-                if(i==0){
+                if(i==1){
                     int* space = memoryScope(maxMem);
-                    printf("Starting scheduler for my_management");
+                    printf("Starting scheduler for my_management\n");
                     FIFO(space, pVec, maxMem);
                 }
                 else{
-                    printf("Starting sheduler for trivial manager");
+                    printf("Starting sheduler for trivial manager\n");
                     trivialFIFO(pVec, maxMem);
                 }
                 t = clock() - t;
                 printf("It took %d clicks.\n\n", t);
             } else {
                 t = clock();
-                if(i==0){
+                if(i==1){
                     int* space = memoryScope((int) (totalMem * memory) +1);
-                    printf("Starting scheduler for my_management altered memory size");
+                    printf("Starting scheduler for my_management altered memory size\n");
                     FIFO(space, pVec, (int) (totalMem * memory) +1);
                 }
                 else{
-                    printf("Starting scheduler for trivial manager altered memory size");
+                    printf("Starting scheduler for trivial manager altered memory size\n");
                     trivialFIFO(pVec, (int) (totalMem * memory) +1);
                 }
                 t = clock() - t;
