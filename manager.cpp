@@ -35,19 +35,19 @@ int checkMemory(int *space, int memorySize, int maxMem){
         return 0;
 }
 
-int my_malloc(int *space, int memoryReq, int maxMem){
+int my_malloc(int *space, int memoryReq, int maxMem, int pid){
     //printf("Malloc started");
     int holeStart = checkMemory(space, memoryReq, maxMem);
     
-    my_malloc(space, memoryReq, holeStart, maxMem);
+    my_malloc(space, memoryReq, holeStart, maxMem, pid);
     
     return holeStart;
 }
 
-void my_malloc(int *space, int memoryReq, int holeStart, int maxMem){
+void my_malloc(int *space, int memoryReq, int holeStart, int maxMem, int pid){
     //printf("Other malloc started\n");
     for(int i=0; i<memoryReq; i++)
-        space[holeStart+i] = rand() % 1000 + 1;
+        space[holeStart+i] =  pid;
 }
 
 void my_free(int *space, int memorySize, int memoryLocale){
