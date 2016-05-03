@@ -137,28 +137,28 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 				///////////////////////////////////////////
 				// TRIVIAL malloc() TIMING
 				//start trivial time
-//				regTime = clock();
-//				//malloc() memory
-//				proc[i]->memSpot = (int *) malloc(sizeof(int) * proc[i]->memory);
-//				//end trivial time
-//				regTime = clock() - regTime;
-//				//total_malloc_time += ?;
-//				regTotalMalTime += regTime;
-//				///////////////////////////////////////////
-//                                
-//                                for(int m=0; m<proc[i]->memory; m++)
-//                                    proc[i]->memSpot[m] = rand() % 1000 + 1;
-//                                
-//				///////////////////////////////////////////
-//				// CUSTOM my_malloc() TIMING
-//				//start custom time
-//				cusTime = clock();
-//				//my_malloc() memory
-//				proc[i]->memPos = my_malloc(space, proc[i]->memory, max_mem);
-//				//end custom time
-//				cusTime = clock() - cusTime;
-//				//total_my_malloc_time += ?;
-//				cusTotalMalTime += cusTime;
+				regTime = clock();
+				//malloc() memory
+				proc[i]->memSpot = (int *) malloc(sizeof(int) * proc[i]->memory);
+				//end trivial time
+				regTime = clock() - regTime;
+				//total_malloc_time += ?;
+				regTotalMalTime += regTime;
+				///////////////////////////////////////////
+                                
+                                for(int m=0; m<proc[i]->memory; m++)
+                                    proc[i]->memSpot[m] = rand() % 1000 + 1;
+                                
+				///////////////////////////////////////////
+				// CUSTOM my_malloc() TIMING
+				//start custom time
+				cusTime = clock();
+				//my_malloc() memory
+				proc[i]->memPos = my_malloc(space, proc[i]->memory, max_mem);
+				//end custom time
+				cusTime = clock() - cusTime;
+				//total_my_malloc_time += ?;
+				cusTotalMalTime += cusTime;
 				///////////////////////////////////////////
 				fifo.pop();
 				std::cout << "Process " << proc[i]->pid << " allocated " <<  proc[i]->memory << " memory at time " << current_time << std::endl;
@@ -179,25 +179,25 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 				///////////////////////////////////////////
 				// TRIVIAL malloc() TIMING
 				//start trivial time
-//				regTime = clock();
-//				//malloc() memory
-//				int* regMem = (int *) malloc(sizeof(int) * proc[i]->memory);
-//				//end trivial time
-//				regTime = clock() - regTime;
-//				//total_malloc_time += ?;
-//				regTotalMalTime += regTime;
-//				///////////////////////////////////////////
-//
-//				///////////////////////////////////////////
-//				// CUSTOM my_malloc() TIMING
-//				//start custom time
-//				cusTime = clock();
-//				//my_malloc() memory
-//				proc[i]->memPos = my_malloc(space, proc[i]->memory, max_mem);
-//				//end custom time
-//				cusTime = clock() - cusTime;
-//				//total_my_malloc_time += ?;
-//				cusTotalMalTime += cusTime;
+				regTime = clock();
+				//malloc() memory
+				int* regMem = (int *) malloc(sizeof(int) * proc[i]->memory);
+				//end trivial time
+				regTime = clock() - regTime;
+				//total_malloc_time += ?;
+				regTotalMalTime += regTime;
+				///////////////////////////////////////////
+
+				///////////////////////////////////////////
+				// CUSTOM my_malloc() TIMING
+				//start custom time
+				cusTime = clock();
+				//my_malloc() memory
+				proc[i]->memPos = my_malloc(space, proc[i]->memory, max_mem);
+				//end custom time
+				cusTime = clock() - cusTime;
+				//total_my_malloc_time += ?;
+				cusTotalMalTime += cusTime;
 				///////////////////////////////////////////
 				fifo.pop();
 				std::cout << "Process " << proc[i]->pid << " allocated " <<  proc[i]->memory << " memory at time " << current_time << std::endl;
@@ -226,28 +226,28 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 			tot_mem -= proc[i]->memory;
 			std::cout << "Process " << proc[i]->pid << " released " <<  proc[i]->memory << " memory at time " << current_time << std::endl;
 
-//			///////////////////////////////////////////
-//			// TRIVIAL free() TIMING
-//			//start trivial time
-//			regTime = clock();
-//			//free() memory
-//			free(proc[i]->memSpot);
-//			//end trivial time
-//			regTime = clock() - regTime;
-//			//total_free_time += ?;
-//			regTotalFreeTime += regTime;
-//			///////////////////////////////////////////
-//
-//			///////////////////////////////////////////
-//			// CUSTOM my_free() TIMING
-//			//start custom time
-//			cusTime = clock();
-//			//my_free() memory
-//			my_free(space, proc[i]->memory, proc[i]->memPos);
-//			//end custom time
-//			cusTime = clock() - cusTime;
-//			//total_my_free_time += ?;
-//			cusTotalFreeTime += cusTime;
+			///////////////////////////////////////////
+			// TRIVIAL free() TIMING
+			//start trivial time
+			regTime = clock();
+			//free() memory
+			free(proc[i]->memSpot);
+			//end trivial time
+			regTime = clock() - regTime;
+			//total_free_time += ?;
+			regTotalFreeTime += regTime;
+			///////////////////////////////////////////
+
+			///////////////////////////////////////////
+			// CUSTOM my_free() TIMING
+			//start custom time
+			cusTime = clock();
+			//my_free() memory
+			my_free(space, proc[i]->memory, proc[i]->memPos);
+			//end custom time
+			cusTime = clock() - cusTime;
+			//total_my_free_time += ?;
+			cusTotalFreeTime += cusTime;
 			///////////////////////////////////////////
 			proc[i] = NULL;
 		}
