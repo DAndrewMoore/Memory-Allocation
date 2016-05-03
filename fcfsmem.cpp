@@ -112,7 +112,7 @@ for (i=0; i<k; i++){
 
 //change according to total need
 if(mem_change != 1.0)
-	max_mem = (int) (total_processes_mem * mem_change);
+	max_mem = (int) (total_processes_mem * mem_change) +1;
 else
 	max_mem = 20000001; //default memory size
 

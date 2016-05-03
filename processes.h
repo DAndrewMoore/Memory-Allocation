@@ -15,6 +15,7 @@ int cycleCount;
 int memoryPrint;
 int entranceTime;
 int memoryOffset;
+int* memorySpot;
 } processStruct;
 
 std::vector<processStruct> genProcs(int, std::string);

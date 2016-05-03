@@ -14,6 +14,14 @@
             </sourceRootList>
             <confList>
                 <confElem>
+                    <name>mainMerge</name>
+                    <type>0</type>
+                </confElem>
+                <confElem>
+                    <name>project2</name>
+                    <type>0</type>
+                </confElem>
+                <confElem>
                     <name>Default</name>
                     <type>0</type>
                 </confElem>
