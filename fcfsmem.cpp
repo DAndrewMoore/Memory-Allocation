@@ -9,8 +9,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <queue>
+#include <vector>
 #include <time.h>
 #include <random>
+#include <thread>
 #include "manager.h"
 
 //using namespace std;
@@ -61,7 +63,7 @@ clock_t regTotalMalTime = 0;
 clock_t regTotalFreeTime = 0;
 
 int rem_mem, max_mem, tot_mem, total_processes_mem;
-max_mem = 20;
+max_mem = 0;
 tot_mem = 0;
 total_processes_mem = 0;
 
@@ -90,9 +92,9 @@ std::cout << "spawning " << k << " processes" << std::endl;
 for (j=0; j<3200; j+=50){
     int cycleCount = cycles(generator);
     int mem = memory(generator);
-	tuples[i] = new tuple(i, j, cycleCount, mem);	// j = arrival t
-	total_processes_mem += mem;
-	i++;
+    tuples[i] = new tuple(i, j, cycleCount, mem);	// j = arrival t
+    total_processes_mem += mem;
+    i++;
 }
 std::cout << "total_processes_mem: " << total_processes_mem << std::endl; 
 
@@ -111,7 +113,7 @@ for (i=0; i<k; i++){
 
 //change according to total need
 if(mem_change != 1.0)
-	max_mem = (int) (total_processes_mem * mem_change);
+	max_mem = (int) (total_processes_mem * mem_change) + 1;
 else
 	max_mem = 20000001; //default memory size
 
@@ -272,12 +274,27 @@ std::cout << std::endl << std::endl << "Total time for custom management system"
 std::cout << "my_malloc(): "<< cusTotalFreeTime << "     my_free(): "<< cusTotalMalTime << "     total custom: "<< total_custom <<  std::endl;
 //
 /////////////////////////////////////////////////////
+delete space;
+delete tuples;
+delete completed;
+delete proc;
+
+exit(0);
+
 }
 
 int main (){
 	double mem_sizes [3] = {1.0, 0.5, 0.1};
-	for(double mem_size: mem_sizes)
-		processProcs(mem_size);
+        std::thread tArray[3];
+        int i=0;
+	for(double mem_size: mem_sizes){
+            std::cout << "Starting call for " << mem_size << std::endl;
+            tArray[i] = std::thread(processProcs, mem_size);
+        }
+        
+        for(int i=0; i<3; i++){
+            tArray[i].join();
+        }
         
         return 0;
 }
