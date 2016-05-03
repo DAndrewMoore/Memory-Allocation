@@ -1,13 +1,15 @@
 CXX = g++
-CXXFLAGS = -std=c++0x
+CXXFLAGS = -std=c++0x -g
 
-main: fcfsmem.o manager.o
-	$(CXX) $(CXXFLAGS) -o main fcfsmem.o manager.o
+main: project2.o processes.o manager.o
+	$(CXX) $(CXXFLAGS) -o main project2.o processes.o manager.o
 
-fcfsmem.o: fcfsmem.cpp manager.h
+fcfsmem.o: fcfsmem.cpp processes.h manager.h
 	$(CXX) $(CXXFLAGS) -c fcfsmem.cpp
+
+processes.o: processes.h
 
 manager.o: manager.h
 
 clean:
-	rm fcfsmem.o manager.o
+	rm project2.o processes.o manager.o

@@ -13,8 +13,9 @@
 
 using namespace std;
 
-void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int processors = 4){
+void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int processors = 64){
     printf("Maximum Memory Available: %d\n", maxMem);
+    printf("Maximum Processors Available: %d\n", processors);
     vector<processStruct> waitQueue;
     vector<processStruct> executing;
     int waitTime = 0;
@@ -83,20 +84,21 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
             if(executing[i].cycleCount <= 0){
                 processStruct pS = executing[i]; //get the process info
                 my_free(space, pS.memoryPrint, pS.memoryOffset); //free the space
-                executing.erase(executing.begin()); //erase the process
+                executing.erase(executing.begin()+i); //erase the process
+                i = i-1;
                 checkMem = 1; //initiate a check if waitQueue processes are waiting for memory
-                //printf("Process unloaded\n");
+                printf("Process unloaded\n");
             }
         
         //Increase waitTime by amount of processes waiting
         waitTime += waitQueue.size();
         
+        counter++;
+        
         if(pVec.size() == 0 && executing.size() == 0 && waitQueue.size() == 0)
             break;
-        
-        counter++;
     }
-    
+    printf("Total count was: %d\n", counter);
     printf("Total wait time: %d\n", waitTime);
     waitTime = waitTime / 64.0;
     printf("Average wait time: %d\n", waitTime);
@@ -108,36 +110,44 @@ int main(int argc, char** argv) {
     //Initiate process vector
     vector<processStruct> pVec = genProcs(64, "Test");
     
-    //Test with 4 cores and 20MB of memory
-    printf("4 cores, 20MB memory\n");
-    t = clock();
-    int* space = memoryScope(20000001);
-    FIFO(space, pVec, 20000001);
-    t = clock() - t;
-    printf("It took %d clicks.\n", t);
+    double memories [3] = {1.0, 0.5, 0.1};
     
-    pVec = genProcs(64, "Test");
+    int maxMem = 20000001;
     
     //Get the total Mem requirement
     double totalMem = 0;
     for(int i=0; i<pVec.size(); i++)
         totalMem += pVec[i].memoryPrint;
     
-    //Test with 4 cores and 50% of total memory requirement
-    printf("\n4 cores, %d bytes of memory\n", (int)(totalMem * 0.5));
-    t = clock();
-    space = memoryScope((int)(totalMem * 0.5));
-    FIFO(space, pVec, totalMem * 0.5);
-    t = clock() - t;
-    printf("It took %d clicks.\n", t);
     
-    pVec = genProcs(64, "Test");
+    for(double memory: memories){
+        if(memory != 1.0){
+            t = clock();
+            int* space = memoryScope(maxMem);
+            FIFO(space, pVec, maxMem);
+            t = clock() - t;
+            printf("It took %d clicks.\n\n", t);
+        } else {
+            t = clock();
+            int* space = memoryScope((int) (totalMem * memory));
+            FIFO(space, pVec, (int) (totalMem * memory));
+            t = clock() - t;
+            printf("It took %d clicks.\n\n", t);
+        }
+        pVec = genProcs(64, "Test");
+    }
     
-    //Test with 4 cores and 10% of total memory requirement
-    printf("\n4 cores, %d bytes of memory\n", (int)(totalMem * 0.1));
+    int maxNeeded = 0;
+    int maxPos = 0;
+    for(int i=0; i<pVec.size(); i++)
+        if(pVec[i].memoryPrint > maxNeeded){
+            maxNeeded = pVec[i].memoryPrint;
+            maxPos = i;
+        }
+    
     t = clock();
-    space = memoryScope((int)(totalMem * 0.1));
-    FIFO(space, pVec, totalMem * 0.1);
+    int* space = memoryScope(maxNeeded);
+    FIFO(space, pVec, maxNeeded);
     t = clock() - t;
     printf("It took %d clicks.\n", t);
     

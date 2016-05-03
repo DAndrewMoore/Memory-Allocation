@@ -220,6 +220,7 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 		if (proc[i]!=NULL && proc[i]->tlip == lowest){//time to free this procs memory 
 			
 			proc[i]->tlip = 0;
+                        std::cout << finished << std::endl;
 			finished++;
 			tot_mem -= proc[i]->memory;
 			std::cout << "Process " << proc[i]->pid << " released " <<  proc[i]->memory << " memory at time " << current_time << std::endl;
@@ -252,7 +253,7 @@ for (current_time=0; finished<64; current_time+=lowest){ // process in lowest cu
 		else if (proc[i]!=NULL && proc[i]->tlip != lowest){//memory still in use. continue...
 			proc[i]->tlip -= lowest;
 		}
-		else ;//cout << i << " proc[i] empty" << endl;
+		else {}//cout << i << " proc[i] empty" << endl;
 	}
 	////////////////////////////////////////////////////////////////////////////////////
 }//finished 64 processes
