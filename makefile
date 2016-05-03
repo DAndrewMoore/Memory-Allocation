@@ -1,11 +1,11 @@
 CXX = g++
 CXXFLAGS = -std=c++0x -w -pthread
 
+mainp2: project2.o processes.o manager.o
+	$(CXX) $(CXXFLAGS) -o mainp2 project2.o processes.o manager.o
+
 mainMerge: fcfsmem.o manager.o
 	$(CXX) $(CXXFLAGS) -o mainMerge fcfsmem.o manager.o
-
-mainp2: project2.o processes.o manager.o
-	$(CXX) $(CXXFLAGS) -o main project2.o processes.o manager.o
 
 fcfsmem.o: fcfsmem.cpp manager.h
 	$(CXX) $(CXXFLAGS) -c fcfsmem.cpp
