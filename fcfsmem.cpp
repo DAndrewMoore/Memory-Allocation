@@ -284,12 +284,12 @@ exit(0);
 }
 
 int main (){
-	double mem_sizes [3] = {1.0, 0.5, 0.1};
-        std::thread tArray[3];
+	double mem_sizes [2] = {1.0, 0.5};
+        std::thread tArray[2];
         int i=0;
 	for(double mem_size: mem_sizes){
             std::cout << "Starting call for " << mem_size << std::endl;
-            tArray[i] = std::thread(processProcs, mem_size);
+            tArray[i++] = std::thread(processProcs, mem_size);
         }
         
         for(int i=0; i<3; i++){
