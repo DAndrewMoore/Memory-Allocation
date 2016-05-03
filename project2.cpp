@@ -40,7 +40,8 @@ void trivialFIFO(vector<processStruct> pVec, int maxMem = 20000001, int processo
                         pS.memorySpot = (int *) malloc(sizeof(int) * pS.memoryPrint);
                         t = clock() - t;
                         total_malloc_time += t;
-                        rem_mem -= pS.memoryPrint;
+                        int mem_to_alloc = pS.memoryPrint;
+                        rem_mem -= mem_to_alloc;
                     } else {
                         waitQueue.push_back(pS);
                     }
@@ -50,7 +51,8 @@ void trivialFIFO(vector<processStruct> pVec, int maxMem = 20000001, int processo
                     pS.memorySpot = (int *) malloc(sizeof(int) * pS.memoryPrint);
                     t = clock() - t;
                     total_malloc_time += t;
-                    rem_mem -= pS.memoryPrint;
+                    int mem_to_alloc = pS.memoryPrint;
+                    rem_mem -= mem_to_alloc;
                     executing.push_back(pS); //push on to executing block
                 }
             }
@@ -62,7 +64,7 @@ void trivialFIFO(vector<processStruct> pVec, int maxMem = 20000001, int processo
         }
         
         //If we're not at process income point, but we need something to process
-        if(checkMem && executing.size() < processors && waitQueue.size() > 0){
+        if(executing.size() <= processors && waitQueue.size() > 0){
             //printf("Checking if we can add a process\n");
             processStruct pS = waitQueue.front(); //Get the process at front of waiting queue
             if(pS.memoryPrint < rem_mem){
@@ -70,6 +72,8 @@ void trivialFIFO(vector<processStruct> pVec, int maxMem = 20000001, int processo
                 pS.memorySpot = (int *) malloc(sizeof(int) * pS.memoryPrint);
                 t = clock() - t;
                 total_malloc_time += t;
+                int mem_to_alloc = pS.memoryPrint;
+                rem_mem -= mem_to_alloc;
                 executing.push_back(pS);
                 waitQueue.erase(waitQueue.begin());
             } else {
@@ -87,6 +91,8 @@ void trivialFIFO(vector<processStruct> pVec, int maxMem = 20000001, int processo
         for(int i=0; i<executing.size(); i++)
             if(executing[i].cycleCount <= 0){
                 processStruct pS = executing[i]; //get the process info
+                int mem_to_alloc = pS.memoryPrint;
+                rem_mem += mem_to_alloc;
                 t = clock();
                 free(executing[i].memorySpot);
                 t = clock() - t;
@@ -102,8 +108,24 @@ void trivialFIFO(vector<processStruct> pVec, int maxMem = 20000001, int processo
         
         counter++;
         
-        if(pVec.size() == 0 && executing.size() == 0 && waitQueue.size() == 0)
+        if(pVec.empty() && executing.empty()&& waitQueue.empty())
             break;
+        else if(pVec.empty() && !waitQueue.empty() && executing.empty()){
+            rem_mem = maxMem;
+            for(int i=0; i<waitQueue.size(); i++){
+                if(waitQueue[i].entranceTime <= counter && waitQueue[i].memoryPrint < rem_mem){
+                    processStruct pS = waitQueue[i];
+                    t = clock();
+                    pS.memorySpot = (int *) malloc(sizeof(int) * pS.memoryPrint);
+                    t = clock() - t;
+                    rem_mem -= pS.memoryPrint;
+                    total_malloc_time += t;
+                    executing.push_back(pS);
+                    waitQueue.erase(waitQueue.begin() + i);
+                    i = i - 1;
+                }
+            }
+        }
     }
     printf("\n============== Trivial Manager ==============\n");
     printf("Total count was: %d\n", counter);
@@ -246,40 +268,34 @@ int main(int argc, char** argv) {
         for(double memory: memories){
             if(memory == 1.0){
                 t = clock();
-                int* space = memoryScope(maxMem);
-                if(i==1)
+                if(i==0){
+                    int* space = memoryScope(maxMem);
+                    printf("Starting scheduler for my_management");
                     FIFO(space, pVec, maxMem);
-                else
+                }
+                else{
+                    printf("Starting sheduler for trivial manager");
                     trivialFIFO(pVec, maxMem);
+                }
                 t = clock() - t;
                 printf("It took %d clicks.\n\n", t);
             } else {
                 t = clock();
-                int* space = memoryScope((int) (totalMem * memory) +1);
-                if(i==1)
+                if(i==0){
+                    int* space = memoryScope((int) (totalMem * memory) +1);
+                    printf("Starting scheduler for my_management altered memory size");
                     FIFO(space, pVec, (int) (totalMem * memory) +1);
-                else
+                }
+                else{
+                    printf("Starting scheduler for trivial manager altered memory size");
                     trivialFIFO(pVec, (int) (totalMem * memory) +1);
+                }
                 t = clock() - t;
                 printf("It took %d clicks.\n\n", t);
             }
             pVec = genProcs(64, "Test");
         }
     }
-    
-//    int maxNeeded = 0;
-//    int maxPos = 0;
-//    for(int i=0; i<pVec.size(); i++)
-//        if(pVec[i].memoryPrint > maxNeeded){
-//            maxNeeded = pVec[i].memoryPrint;
-//            maxPos = i;
-//        }
-//    
-//    t = clock();
-//    int* space = memoryScope(maxNeeded);
-//    FIFO(space, pVec, maxNeeded);
-//    t = clock() - t;
-//    printf("It took %d clicks.\n", t);
     
     return 0;
 }
