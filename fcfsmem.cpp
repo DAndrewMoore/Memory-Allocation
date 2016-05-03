@@ -292,7 +292,7 @@ int main (){
             tArray[i++] = std::thread(processProcs, mem_size);
         }
         
-        for(int i=0; i<3; i++){
+        for(int i=0; i<2; i++){
             tArray[i].join();
         }
         
