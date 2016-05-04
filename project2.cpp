@@ -15,7 +15,7 @@
 
 using namespace std;
 
-void trivialFIFO(vector<processStruct> pVec, string seed, int maxMem = 20000001, int processors = 64){
+void trivialFIFO(vector<processStruct> pVec, std::ofstream& f, int maxMem = 20000001, int processors = 64){
     printf("Maximum Memory Available: %d\n", maxMem);
     printf("Maximum Processors Available: %d\n", processors);
     vector<processStruct> waitQueue;
@@ -129,8 +129,6 @@ void trivialFIFO(vector<processStruct> pVec, string seed, int maxMem = 20000001,
             }
         }
     }
-    ofstream f;
-    f.open(".\\seeds\\"+seed+".csv");
     printf("\n============== Trivial Manager ==============\n");
     printf("Total count was: %d\n", counter);
     printf("Average count per process: %f\n", (counter / 64.0));
@@ -143,7 +141,7 @@ void trivialFIFO(vector<processStruct> pVec, string seed, int maxMem = 20000001,
     
 }
 
-void FIFO(int* space, vector<processStruct> pVec, string seed, int maxMem = 20000001, int processors = 64){
+void FIFO(int* space, vector<processStruct> pVec, std::ofstream& f, int maxMem = 20000001, int processors = 64){
     printf("Maximum Memory Available: %d\n", maxMem);
     printf("Maximum Processors Available: %d\n", processors);
     vector<processStruct> waitQueue;
@@ -248,8 +246,6 @@ void FIFO(int* space, vector<processStruct> pVec, string seed, int maxMem = 2000
         if(pVec.size() == 0 && executing.size() == 0 && waitQueue.size() == 0)
             break;
     }
-    ofstream f;
-    f.open(".\\seeds\\"+seed+".csv");
     printf("\n============== Custom Manager ==============\n");
     printf("Total count was: %d\n", counter);
     printf("Average count per process: %f\n", (counter / 64.0));
@@ -276,10 +272,9 @@ int main(int argc, char** argv) {
     //Get the total Mem requirement
     printf("Total_Time, Total_malloc_time, Total_free_time\n");
     for(string seed: seeds){
-        ofstream f;
+        std::ofstream f;
         f.open(".\\seeds\\"+seed+".csv");
         f << "Total_Time,Total_malloc_time,Total_free_time\n";
-        f.close();
         //Initiate process vector
         vector<processStruct> pVec = genProcs(64, seed);
         //printf("For seed: %s\n", seed.c_str());
@@ -290,11 +285,11 @@ int main(int argc, char** argv) {
                     if(i==1){
                         int* space = memoryScope(maxMem);
                         //printf("Starting scheduler for my_management\n");
-                        FIFO(space, pVec, seed, maxMem);
+                        FIFO(space, pVec, f, maxMem);
                     }
                     else{
                         //printf("Starting scheduler for trivial manager\n");
-                        trivialFIFO(pVec, seed, maxMem);
+                        trivialFIFO(pVec, f, maxMem);
                     }
                     t = clock() - t;
                     //printf("It took %d clicks.\n\n", t);
@@ -306,11 +301,11 @@ int main(int argc, char** argv) {
                     if(i==1){
                         int* space = memoryScope((int) (totalMem * memory) +1);
                         //printf("Starting scheduler for my_management altered memory size\n");
-                        FIFO(space, pVec, seed, (int) (totalMem * memory) +1);
+                        FIFO(space, pVec, f, (int) (totalMem * memory) +1);
                     }
                     else{
                         //printf("Starting scheduler for trivial manager altered memory size\n");
-                        trivialFIFO(pVec, seed, (int) (totalMem * memory) +1);
+                        trivialFIFO(pVec, f, (int) (totalMem * memory) +1);
                     }
                     t = clock() - t;
                     //printf("It took %d clicks.\n\n", t);
