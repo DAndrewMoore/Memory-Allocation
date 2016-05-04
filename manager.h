@@ -10,8 +10,8 @@
 
 int* memoryScope(int);
 int checkMemory(int*, int, int);
-int my_malloc(int*, int, int);
-void my_malloc(int*, int, int, int);
+int my_malloc_and_check(int*, int, int, int pid);
+void my_malloc(int*, int, int, int, int pid);
 void my_free(int*, int, int);
 
 #endif	/* MANAGER_H */
