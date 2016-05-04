@@ -175,7 +175,7 @@ void FIFO(int* space, vector<processStruct> pVec, int maxMem = 20000001, int pro
                 } else { //If we have no processors in use
                     processStruct pS = pVec.front(); //get the process
                     t = clock();
-                    int holeStart = my_malloc(space, pS.memoryPrint, maxMem, pS.pid); //unconditional malloc since 0 processes executing
+                    int holeStart = my_malloc_and_check(space, pS.memoryPrint, maxMem, pS.pid); //unconditional malloc since 0 processes executing
                     t = clock() - t;
                     total_malloc_time += t;
                     pS.memoryOffset = holeStart; //assign the holeStart position for faster deletion
